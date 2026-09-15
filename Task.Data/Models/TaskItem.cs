@@ -15,5 +15,7 @@ public partial class TaskItem
 
     public string Priority { get; set; } = null!;
 
-    public DateTime DueDate { get; set; }
+    public DateTime? DueDate { get; set; }
+
+    public bool DeleteFlag { get; set; }
 }
