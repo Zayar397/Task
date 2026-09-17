@@ -14,7 +14,7 @@ namespace Task.Domain.Models
         public bool IsSuccess { get; set; }
         public bool IsValidationError { get { return Status == ResultStatus.ValidationError; } }
         public bool IsSystemError { get { return Status == ResultStatus.SystemError; } }
-        public static Result<T> Success(T data, string message = null)
+        public static Result<T> Success(string message = null, T data = default)
         {
             return new Result<T>
             {

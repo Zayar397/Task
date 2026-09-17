@@ -14,9 +14,10 @@ namespace Task.Domain.Features.Task
     public class TaskService
     {
         private readonly HRMSDbContext _db;
-        public TaskService()
+
+        public TaskService(HRMSDbContext db)
         {
-            _db = new HRMSDbContext();
+            _db = db;
         }
 
         public async Task<Result<TaskResponseModel>> GetAllTasksAsync()
@@ -28,7 +29,7 @@ namespace Task.Domain.Features.Task
             {
                 AllTasks = tasks
             };
-            model = Result<TaskResponseModel>.Success(responseModel);
+            model = Result<TaskResponseModel>.Success("Record exist.",responseModel);
 
             return model;
         }
@@ -48,7 +49,7 @@ namespace Task.Domain.Features.Task
             {
                 Task = task
             };
-            model = Result<TaskResponseModel>.Success(responseModel);
+            model = Result<TaskResponseModel>.Success("Record exist.",responseModel);
 
         Result:
             return model;
@@ -68,7 +69,79 @@ namespace Task.Domain.Features.Task
                 Task = item
             };
 
-            model = Result<TaskResponseModel>.Success(responseModel, message);
+            model = Result<TaskResponseModel>.Success(message, responseModel);
+            return model;
+        }
+
+        public async Task<Result<TaskResponseModel>> UpdateTaskAsync(int id,TaskItem task)
+        {
+            Result<TaskResponseModel> model = new Result<TaskResponseModel>();
+
+            var taskItem = await _db.TaskItems.FirstOrDefaultAsync(x => x.Id == id && x.DeleteFlag == false);
+            if (taskItem == null)
+            {
+                model = Result<TaskResponseModel>.ValidationError("Record does not exist.");
+                goto Result;
+            }
+
+            if (!string.IsNullOrEmpty(task.Title))
+            {
+                taskItem.Title = task.Title;
+            }
+            if (!string.IsNullOrEmpty(task.Description))
+            {
+                taskItem.Description = task.Description;
+            }
+            if (!string.IsNullOrEmpty(task.Status))
+            {
+                taskItem.Status = task.Status;
+            }
+            if (!string.IsNullOrEmpty(task.Priority))
+            {
+                taskItem.Priority = task.Priority;
+            }
+            if (task.DueDate.HasValue && task.DueDate != DateTime.MinValue)
+            {
+                taskItem.DueDate = task.DueDate;
+            }
+
+            _db.Entry(taskItem).State = EntityState.Modified;
+            int recCount = await _db.SaveChangesAsync();
+
+            string message = recCount > 0 ? "Record updated successfully." : "Record updated failed.";
+
+            TaskResponseModel taskResponseModel = new TaskResponseModel
+            {
+                Task = taskItem
+            };
+
+            model = Result<TaskResponseModel>.Success(message, taskResponseModel);
+
+        Result:
+            return model;
+        }
+
+        public async Task<Result<TaskResponseModel>> DeleteTaskAsync(int id)
+        {
+            Result<TaskResponseModel> model = new Result<TaskResponseModel>();
+
+            var taskItem = await _db.TaskItems.FirstOrDefaultAsync(x => x.Id == id && x.DeleteFlag == false);
+            if (taskItem == null)
+            {
+                model = Result<TaskResponseModel>.ValidationError("Record does not exist.");
+                goto Result;
+            }
+
+            taskItem.DeleteFlag = true;
+
+            _db.Entry(taskItem).State = EntityState.Modified;
+            int recCount = await _db.SaveChangesAsync();
+
+            string message = recCount > 0 ? "Record deleted successfully." : "Record deleted failed.";
+
+            model = Result<TaskResponseModel>.Success(message);
+
+        Result:
             return model;
         }
     }

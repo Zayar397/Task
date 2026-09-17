@@ -7,11 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.31" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Task.Data\Task.Data.csproj" />
+    <ProjectReference Include="..\Task.Domain\Task.Domain.csproj" />
   </ItemGroup>
 
 </Project>

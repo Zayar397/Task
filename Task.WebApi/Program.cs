@@ -1,6 +1,16 @@
+using Microsoft.EntityFrameworkCore;
+using Task.Data.Data;
+using Task.Domain.Features.Task;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddDbContext<HRMSDbContext>(opt =>
+{
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection"));
+}, ServiceLifetime.Transient, ServiceLifetime.Transient);
+
+builder.Services.AddScoped<TaskService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
